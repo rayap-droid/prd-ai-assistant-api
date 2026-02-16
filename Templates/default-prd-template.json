@@ -1,0 +1,21 @@
+{
+  "name": "Default PRD Template",
+  "description": "Standard product requirements document template",
+  "version": "1.0",
+  "sections": [
+    { "key": "title", "title": "Product Title", "description": "Name of the product or feature", "required": true, "order": 1, "mappedPhase": "Discovery", "promptHints": ["What is the name of this product/feature?", "Do you have a working title?"] },
+    { "key": "problem_statement", "title": "Problem Statement", "description": "The core problem this product solves", "required": true, "order": 2, "mappedPhase": "Discovery", "promptHints": ["What problem are you trying to solve?", "Who is affected?"] },
+    { "key": "target_users", "title": "Target Users", "description": "Primary and secondary user personas", "required": true, "order": 3, "mappedPhase": "Discovery", "promptHints": ["Who are the primary users?", "What are their pain points?"] },
+    { "key": "goals_objectives", "title": "Goals & Objectives", "description": "Business goals and measurable objectives", "required": true, "order": 4, "mappedPhase": "Discovery", "promptHints": ["What does success look like?", "What metrics will this impact?"] },
+    { "key": "user_stories", "title": "User Stories", "description": "Key user stories in As a/I want/So that format", "required": true, "order": 5, "mappedPhase": "Requirements", "promptHints": ["Walk me through a typical user workflow", "What key actions do users perform?"] },
+    { "key": "functional_requirements", "title": "Functional Requirements", "description": "Specific features and capabilities", "required": true, "order": 6, "mappedPhase": "Requirements", "promptHints": ["What features are must-haves for v1?", "What should the system do?"] },
+    { "key": "scope_boundaries", "title": "Scope & Boundaries", "description": "What is in and out of scope", "required": true, "order": 7, "mappedPhase": "Requirements", "promptHints": ["What is explicitly NOT in scope?", "Features deferred to future?"] },
+    { "key": "non_functional_requirements", "title": "Non-Functional Requirements", "description": "Performance, security, scalability", "required": true, "order": 8, "mappedPhase": "Technical", "promptHints": ["Any performance requirements?", "Security or compliance needs?"] },
+    { "key": "technical_constraints", "title": "Technical Constraints", "description": "Technology limitations and integrations", "required": false, "order": 9, "mappedPhase": "Technical", "promptHints": ["Systems to integrate with?", "Platform constraints?"] },
+    { "key": "acceptance_criteria", "title": "Acceptance Criteria", "description": "Testable conditions for completion", "required": true, "order": 10, "mappedPhase": "AcceptanceCriteria", "promptHints": ["How will you verify this works?", "What are the edge cases?"] },
+    { "key": "success_metrics", "title": "Success Metrics", "description": "KPIs to measure post-launch success", "required": true, "order": 11, "mappedPhase": "AcceptanceCriteria", "promptHints": ["How will you measure success?", "What KPIs will you track?"] },
+    { "key": "timeline_milestones", "title": "Timeline & Milestones", "description": "Key dates and delivery phases", "required": false, "order": 12, "mappedPhase": "Requirements", "promptHints": ["Any hard deadlines?", "Major milestones?"] },
+    { "key": "risks_dependencies", "title": "Risks & Dependencies", "description": "Known risks and mitigation strategies", "required": false, "order": 13, "mappedPhase": "Technical", "promptHints": ["What could go wrong?", "External dependencies?"] },
+    { "key": "open_questions", "title": "Open Questions", "description": "Unresolved questions needing follow-up", "required": false, "order": 14, "mappedPhase": "Review", "promptHints": ["Anything still unclear?", "What needs further discussion?"] }
+  ]
+}
