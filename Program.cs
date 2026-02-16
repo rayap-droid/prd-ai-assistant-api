@@ -57,7 +57,8 @@ builder.Services.AddCors(opts =>
     {
         var origins = builder.Configuration
             .GetSection("Cors:AllowedOrigins")
-            .Get<string[]>() ?? ["http://localhost:3000", "http://localhost:5173"];
+.Get<string[]>() ?? ["http://localhost:3000", "http://localhost:5173", "https://rayap-droid.github.io"];
+
         policy.WithOrigins(origins)
               .AllowAnyHeader()
               .AllowAnyMethod()
