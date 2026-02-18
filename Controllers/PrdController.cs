@@ -6,7 +6,8 @@ using PrdAiAssistant.Api.Models;
 namespace PrdAiAssistant.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/library")]
+public class PrdController : ControllerBase
 public class PrdController : ControllerBase
 {
     private readonly AppDbContext _db;
