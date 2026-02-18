@@ -2,8 +2,11 @@ using Microsoft.AspNetCore.RateLimiting;
 using PrdAiAssistant.Api.Models.Configuration;
 using PrdAiAssistant.Api.Services;
 using System.Threading.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using PrdAiAssistant.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.Configure<AnthropicSettings>(
     builder.Configuration.GetSection("Anthropic"));
@@ -38,6 +41,8 @@ builder.Services.AddSingleton<ConversationManager>();
 builder.Services.AddScoped<ClaudeService>();
 builder.Services.AddScoped<PrdTemplateEngine>();
 builder.Services.AddScoped<JiraService>();
+builder.Services.AddDbContext<AppDbContext>(opts =>
+    opts.UseSqlite("Data Source=prd.db"));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -79,6 +84,12 @@ builder.Services.AddRateLimiter(opts =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+}
 
 if (app.Environment.IsDevelopment())
 {
