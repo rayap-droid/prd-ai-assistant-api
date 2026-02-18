@@ -90,6 +90,51 @@ public class ConversationController : ControllerBase
         var template = _templates.LoadTemplate(session!.TemplateName);
         return Ok(_conversations.BuildPreview(session, template));
     }
+[HttpPost("/api/prd/generate")]
+    public async Task<IActionResult> GeneratePrd([FromBody] GeneratePrdRequest request, CancellationToken ct)
+    {
+        if (!_conversations.TryGetSession(request.SessionId, out var session))
+            return NotFound(new { error = $"Session '{request.SessionId}' not found." });
+        var template = _templates.LoadTemplate(session!.TemplateName);
+        
+        // Ask Claude to generate the full PRD
+        session.AddMessage("user", "Based on everything we've discussed, please generate a complete, professional PRD in markdown format. Include all sections with the information gathered so far. For sections where information is missing, add placeholder notes.");
+        var response = await _claude.ChatAsync(session, template, ct);
+        session.AddMessage("assistant", response.Reply);
+        
+        var prd = _templates.BuildPrdFromData(session.Id, session.ExtractedData, template, response.Reply);
+        return Ok(prd);
+    }
+
+    [HttpPost("/api/prd/generate/quick")]
+    public IActionResult GenerateQuickPrd([FromBody] GeneratePrdRequest request)
+    {
+        if (!_conversations.TryGetSession(request.SessionId, out var session))
+            return NotFound(new { error = $"Session '{request.SessionId}' not found." });
+        var template = _templates.LoadTemplate(session!.TemplateName);
+        var prd = _templates.BuildPrdFromData(session.Id, session.ExtractedData, template);
+        return Ok(prd);
+    }
+
+    [HttpGet("/api/prd/{sessionId}/export/markdown")]
+    public IActionResult ExportMarkdown(string sessionId)
+    {
+        if (!_conversations.TryGetSession(sessionId, out var session))
+            return NotFound(new { error = $"Session '{sessionId}' not found." });
+        var template = _templates.LoadTemplate(session!.TemplateName);
+        var prd = _templates.BuildPrdFromData(session.Id, session.ExtractedData, template);
+        return File(System.Text.Encoding.UTF8.GetBytes(prd.Markdown), "text/markdown", "PRD.md");
+    }
+
+    [HttpGet("/api/prd/{sessionId}/export/html")]
+    public IActionResult ExportHtml(string sessionId)
+    {
+        if (!_conversations.TryGetSession(sessionId, out var session))
+            return NotFound(new { error = $"Session '{sessionId}' not found." });
+        var template = _templates.LoadTemplate(session!.TemplateName);
+        var prd = _templates.BuildPrdFromData(session.Id, session.ExtractedData, template);
+        return File(System.Text.Encoding.UTF8.GetBytes(prd.Html), "text/html", "PRD.html");
+    }
 
     private static string BuildWelcomePrompt(string? projectContext)
     {
@@ -100,3 +145,4 @@ public class ConversationController : ControllerBase
 
 public record ConversationDetailResponse(ConversationInfo Info, List<MessageDto> Messages, PrdPreview? Preview, List<string> ExtractedKeys);
 public record MessageDto(string Role, string Content, DateTime Timestamp);
+public record GeneratePrdRequest(string SessionId);
