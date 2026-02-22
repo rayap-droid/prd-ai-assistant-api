@@ -136,6 +136,53 @@ public class ConversationController : ControllerBase
         return File(System.Text.Encoding.UTF8.GetBytes(prd.Html), "text/html", "PRD.html");
     }
 
+[HttpPost("suggest")]
+    public async Task<IActionResult> SuggestAnswer([FromBody] SuggestAnswerRequest request, CancellationToken ct)
+    {
+        if (!_conversations.TryGetSession(request.SessionId, out var session))
+            return NotFound(new { error = $"Session '{request.SessionId}' not found." });
+
+        var lastAssistantMsg = session!.Messages.LastOrDefault(m => m.Role == "assistant")?.Content ?? "";
+        
+        var suggestPrompt = $@"You are helping auto-answer an interview question for a PRD. 
+Based on the feature request context and any information you can find, suggest a comprehensive answer.
+
+FEATURE REQUEST CONTEXT:
+{request.FeatureRequestContext}
+
+CURRENT INTERVIEW QUESTION:
+{lastAssistantMsg}
+
+Please provide a detailed, professional answer to this interview question. 
+Be specific and include concrete details where possible.
+Write the answer as if you are the stakeholder being interviewed.
+Keep it concise but thorough - 2-4 paragraphs.";
+
+        try
+        {
+            var httpFactory = HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>();
+            var client = httpFactory.CreateClient("Anthropic");
+            
+            var body = new
+            {
+                model = "claude-sonnet-4-20250514",
+                max_tokens = 1000,
+                messages = new[] { new { role = "user", content = suggestPrompt } }
+            };
+
+            var resp = await client.PostAsJsonAsync("v1/messages", body, ct);
+            var json = await resp.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>(ct);
+            var suggestion = json.GetProperty("content")[0].GetProperty("text").GetString() ?? "";
+            
+            return Ok(new { suggestion });
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Suggest answer failed");
+            return StatusCode(500, new { error = "Failed to generate suggestion." });
+        }
+    }
+
     private static string BuildWelcomePrompt(string? projectContext)
     {
         var ctx = string.IsNullOrEmpty(projectContext) ? "" : $" The project context is: {projectContext}";
@@ -146,3 +193,4 @@ public class ConversationController : ControllerBase
 public record ConversationDetailResponse(ConversationInfo Info, List<MessageDto> Messages, PrdPreview? Preview, List<string> ExtractedKeys);
 public record MessageDto(string Role, string Content, DateTime Timestamp);
 public record GeneratePrdRequest(string SessionId);
+public record SuggestAnswerRequest(string SessionId, string FeatureRequestContext);
